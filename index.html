@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Video Generator</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0f0f0f; color: white; font-family: Arial; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+h1 { font-size: 32px; margin-bottom: 10px; color: #a855f7; }
+p { color: #888; margin-bottom: 30px; text-align: center; }
+textarea { width: 100%; max-width: 500px; height: 120px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; color: white; padding: 15px; font-size: 16px; resize: none; }
+button { margin-top: 15px; width: 100%; max-width: 500px; padding: 15px; background: #a855f7; border: none; border-radius: 12px; color: white; font-size: 18px; cursor: pointer; }
+button:disabled { background: #555; }
+#status { margin-top: 20px; color: #a855f7; }
+video { margin-top: 20px; width: 100%; max-width: 500px; border-radius: 12px; }
+</style>
+</head>
+<body>
+<h1>🎬 AI Video Generator</h1>
+<p>Turn your ideas into stunning videos using Artificial Intelligence</p>
+<textarea id="prompt" placeholder="Example: A sunset over the ocean with gentle waves..."></textarea>
+<button id="btn" onclick="generate()">🚀 Generate Video</button>
+<div id="status"></div>
+<video id="video" controls style="display:none"></video>
+
+<script>
+async function generate() {
+  const prompt = document.getElementById('prompt').value;
+  if (!prompt) return alert('Please enter a video description!');
+  
+  const btn = document.getElementById('btn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  status.textContent = 'Processing your request, please wait...';
+
+  try {
+    const res = await fetch('/.netlify/functions/generate', {
+      method: 'POST',
+      body: JSON.stringify({ prompt })
+    });
+    const data = await res.json();
+    if (data.video_url) {
+      const video = document.getElementById('video');
+      video.src = data.video_url;
+      video.style.display = 'block';
+      status.textContent = '✅ Your video is ready!';
+    } else {
+      status.textContent = '❌ Something went wrong, please try again';
+    }
+  } catch(e) {
+    status.textContent = '❌ Something went wrong, please try again';
+  }
+  
+  btn.disabled = false;
+  btn.textContent = '🚀 Generate Video';
+}
+</script>
+</body>
+</html>
